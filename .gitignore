@@ -1,0 +1,17 @@
+# Python
+backend/.venv/
+backend/__pycache__/
+backend/*.pyc
+backend/taskboard.db
+*.pyc
+__pycache__/
+
+# Node
+frontend/node_modules/
+frontend/dist/
+frontend/.vite/
+
+# Misc
+.env
+*.log
+check_db.py
