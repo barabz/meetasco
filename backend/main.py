@@ -61,6 +61,28 @@ def list_users(db: Session = Depends(get_db), _: models.User = Depends(auth.get_
     return db.query(models.User).all()
 
 
+# ── Deadlines (calendar) ─────────────────────────────────────────────────────
+@app.get("/api/deadlines")
+def get_deadlines(db: Session = Depends(get_db), current_user: models.User = Depends(auth.get_current_user)):
+    boards = db.query(models.Board).all()
+    result = []
+    for board in boards:
+        for lst in board.lists:
+            for card in lst.cards:
+                if card.deadline:
+                    result.append({
+                        "card_id": card.id,
+                        "title": card.title,
+                        "deadline": card.deadline.isoformat(),
+                        "board_id": board.id,
+                        "board_title": board.title,
+                        "board_color": board.color,
+                        "list_title": lst.title,
+                        "is_completed": card.is_completed,
+                    })
+    return result
+
+
 # ── Boards ────────────────────────────────────────────────────────────────────
 @app.get("/api/boards", response_model=List[schemas.BoardSummary])
 def list_boards(db: Session = Depends(get_db), _: models.User = Depends(auth.get_current_user)):

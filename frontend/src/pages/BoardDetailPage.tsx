@@ -3,9 +3,10 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { ChevronLeft } from 'lucide-react';
 import type { Board, Card, User } from '../types';
 import api from '../api/client';
-import Header from '../components/Header';
+import Layout from '../components/Layout';
 import KanbanBoard from '../components/KanbanBoard';
 import CardModal from '../components/CardModal';
+import { trackBoardView } from './HomePage';
 
 export default function BoardDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -20,9 +21,11 @@ export default function BoardDetailPage() {
       api.get(`/api/boards/${id}`),
       api.get('/api/users'),
     ]).then(([boardRes, usersRes]) => {
-      setBoard(boardRes.data);
+      const b: Board = boardRes.data;
+      setBoard(b);
       setUsers(usersRes.data);
       setLoading(false);
+      trackBoardView(b.id, b.title, b.color);
     }).catch(() => navigate('/'));
   }, [id, navigate]);
 
@@ -53,22 +56,20 @@ export default function BoardDetailPage() {
 
   if (loading) {
     return (
-      <div className="app-layout">
-        <Header />
+      <Layout>
         <div className="loading-state">Loading board...</div>
-      </div>
+      </Layout>
     );
   }
 
   if (!board) return null;
 
   return (
-    <div className="app-layout">
-      <Header />
+    <Layout>
       <div className="board-page" style={{ '--board-color': board.color } as React.CSSProperties}>
         <div className="board-page-header">
           <button className="btn-ghost btn-sm back-btn" onClick={() => navigate('/')}>
-            <ChevronLeft size={16} /> Boards
+            <ChevronLeft size={16} /> Home
           </button>
           <div className="board-page-title-row">
             <div className="board-dot" style={{ background: board.color }} />
@@ -95,6 +96,6 @@ export default function BoardDetailPage() {
           onDeleted={handleCardDeleted}
         />
       )}
-    </div>
+    </Layout>
   );
 }
